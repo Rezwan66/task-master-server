@@ -24,12 +24,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 });
-    console.log(
-      'Pinged your deployment. You successfully connected to MongoDB!'
-    );
+    // await client.db('admin').command({ ping: 1 });
+    // console.log(
+    //   'Pinged your deployment. You successfully connected to MongoDB!'
+    // );
 
     const tasksCollection = client.db('taskMasterDB').collection('tasks');
 
@@ -48,19 +48,34 @@ async function run() {
       res.send(result);
     });
     app.patch('/tasks/:id', async (req, res) => {
-      const updatedCategory = req.body;
+      const { category } = req.body;
       const id = req.params.id;
+      //   console.log(id, category);
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
-          category: updatedCategory,
+          category: category,
         },
       };
       const result = await tasksCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
+    app.put('/tasks/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedTask = req.body;
+      const updatedDoc = {
+        $set: {
+          ...updatedTask,
+        },
+      };
+      //   console.log(filter, updatedDoc);
+      const result = await tasksCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
     app.delete('/tasks/:id', async (req, res) => {
       const id = req.params.id;
+      //   console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await tasksCollection.deleteOne(query);
       res.send(result);
